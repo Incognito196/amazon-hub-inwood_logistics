@@ -507,7 +507,40 @@
                 <div class="stat-card">
                     <h3>Total Historical</h3>
                     <div class="value" id="totalHistorical">$0.00</div>
-                    <div class="change">All-time profit + bonuses</div>
+                    <div class="change">All-time profit + bonuses + HCP</div>
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h3 style="margin-bottom: 16px; color: #2d3748;">Quick Financial Summary</h3>
+                <div class="alert alert-info">
+                    <strong>Today:</strong> Friday, August 16, 2025 (2:00 AM) | <strong>Current Week:</strong> Aug 11-17 (Mon-Sun)
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h4>Week So Far (Aug 11-15)</h4>
+                        <div class="amount" style="font-size: 16px;">
+                            <strong>SB:</strong> 200 pkgs<br>
+                            <strong>809:</strong> 200 pkgs<br>
+                            <strong>CS:</strong> 153 pkgs
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Outstanding This Week</h4>
+                        <div class="amount" style="font-size: 16px;">
+                            <strong>Gabriel:</strong> $162<br>
+                            <strong>Rafa JR:</strong> $153<br>
+                            <strong>Jeuris:</strong> $276
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Payment Status</h4>
+                        <div class="amount">All paid through Aug 10</div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Today's Plan</h4>
+                        <div class="amount">Add Aug 16 deliveries</div>
+                    </div>
                 </div>
             </div>
 
@@ -761,24 +794,29 @@
                     <div class="summary-item">
                         <h4>Gabriel Total</h4>
                         <div class="amount" id="gabrielTotal">$0.00</div>
+                        <button class="btn btn-success" onclick="payDriverAll('Gabriel')" style="margin-top: 10px;">Pay All</button>
                     </div>
                     <div class="summary-item">
                         <h4>Rafa JR Total</h4>
                         <div class="amount" id="rafaTotal">$0.00</div>
+                        <button class="btn btn-success" onclick="payDriverAll('Rafa JR')" style="margin-top: 10px;">Pay All</button>
                     </div>
                     <div class="summary-item">
                         <h4>Jeuris Total</h4>
                         <div class="amount" id="jeurisTotal">$0.00</div>
+                        <button class="btn btn-success" onclick="payDriverAll('Jeuris')" style="margin-top: 10px;">Pay All</button>
                     </div>
                     <div class="summary-item">
                         <h4>Jamel Total</h4>
                         <div class="amount" id="jamelTotal">$0.00</div>
+                        <button class="btn btn-success" onclick="payDriverAll('Jamel')" style="margin-top: 10px;">Pay All</button>
                     </div>
                 </div>
 
                 <div class="export-section">
                     <button class="btn btn-primary" onclick="exportPayouts()">Export Weekly Report</button>
                     <button class="btn btn-secondary" onclick="markAllPaid()">Mark All Paid</button>
+                    <button class="btn btn-warning" onclick="markAllPastWeeksPaid()">Mark All Past Weeks Paid</button>
                 </div>
             </div>
         </div>
@@ -1000,6 +1038,7 @@
                     <button class="btn btn-primary" onclick="exportAllData()">Export All Data</button>
                     <button class="btn btn-secondary" onclick="importData()">Import Data</button>
                     <button class="btn btn-secondary" onclick="backupData()">Backup Data</button>
+                    <button class="btn btn-warning" onclick="verifyCalculations()">Verify All Math</button>
                 </div>
             </div>
         </div>
@@ -1057,7 +1096,7 @@
         // Enhanced data structure with all historical data, bonuses, and flexible HCP
         let inwoodData = {
             entries: [
-                // Historical entries from July-August 2025
+                // Historical entries from July 2025
                 {id: 1, date: '2025-07-21', driver: 'Gabriel', business: 'Senor Bigote', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
                 {id: 2, date: '2025-07-21', driver: 'Gabriel', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
                 {id: 3, date: '2025-07-21', driver: 'Rafa JR', business: 'Cana Stays', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
@@ -1081,17 +1120,33 @@
                 
                 {id: 17, date: '2025-07-27', driver: 'Rafa JR', business: 'Cana Stays', packages: 37, amazonPay: 67.5, driverPay: 37, profit: 30.5},
                 
-                // Continue with more entries through August...
+                // Current week entries - August 11-15, 2025 (completed deliveries only)
+                // Monday, August 11
                 {id: 18, date: '2025-08-11', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
-                {id: 19, date: '2025-08-12', driver: 'Gabriel', business: 'Senor Bigote', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
-                {id: 20, date: '2025-08-13', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
-                {id: 21, date: '2025-08-13', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
-                {id: 22, date: '2025-08-14', driver: 'Gabriel', business: 'Senor Bigote', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
-                {id: 23, date: '2025-08-14', driver: 'Rafa JR', business: 'Cana Stays', packages: 37, amazonPay: 67.5, driverPay: 37, profit: 30.5},
-                {id: 24, date: '2025-08-14', driver: 'Jeuris', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
-                {id: 25, date: '2025-08-15', driver: 'Rafa JR', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
-                {id: 26, date: '2025-08-15', driver: 'Jeuris', business: 'Senor Bigote', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
-                {id: 27, date: '2025-08-15', driver: 'Jeuris', business: '809 Restaurant', packages: 38, amazonPay: 69, driverPay: 38, profit: 31}
+                {id: 19, date: '2025-08-11', driver: 'Rafa JR', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 20, date: '2025-08-11', driver: 'Jeuris', business: '809 Restaurant', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                
+                // Tuesday, August 12
+                {id: 21, date: '2025-08-12', driver: 'Gabriel', business: 'Senor Bigote', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
+                {id: 22, date: '2025-08-12', driver: 'Jeuris', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 23, date: '2025-08-12', driver: 'Jeuris', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                
+                // Wednesday, August 13
+                {id: 24, date: '2025-08-13', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 25, date: '2025-08-13', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 26, date: '2025-08-13', driver: 'Jeuris', business: '809 Restaurant', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                
+                // Thursday, August 14
+                {id: 27, date: '2025-08-14', driver: 'Gabriel', business: 'Senor Bigote', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 28, date: '2025-08-14', driver: 'Rafa JR', business: 'Cana Stays', packages: 37, amazonPay: 67.5, driverPay: 37, profit: 30.5},
+                {id: 29, date: '2025-08-14', driver: 'Jeuris', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                
+                // Friday, August 15 - Gabriel OFF, others still working
+                {id: 30, date: '2025-08-15', driver: 'Rafa JR', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 31, date: '2025-08-15', driver: 'Jeuris', business: '809 Restaurant', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 32, date: '2025-08-15', driver: 'Jeuris', business: 'Senor Bigote', packages: 38, amazonPay: 69, driverPay: 38, profit: 31}
+                
+                // August 16-17 will be added as they happen
             ],
             drivers: ['Gabriel', 'Rafa JR', 'Jeuris', 'Jamel'],
             businesses: [
@@ -1105,22 +1160,20 @@
                 {id: 2, business: 'Senor Bigote', amount: 250, date: '2025-07-30', notes: 'End of July bonus'}
             ],
             payments: [
-                // All past weeks marked as paid (everyone paid up until current week)
-                {driver: 'Gabriel', amount: 811, date: '2025-07-28', week: '2025-W30'},
-                {driver: 'Rafa JR', amount: 241, date: '2025-07-28', week: '2025-W30'},
-                {driver: 'Jeuris', amount: 75, date: '2025-07-28', week: '2025-W30'},
+                // All payments marked as paid up through August 10, 2025
+                // Week of July 21-27, 2025 (Week 30)
+                {driver: 'Gabriel', business: 'Senor Bigote', amount: 160, date: '2025-07-28', week: '2025-W30'},
+                {driver: 'Gabriel', business: '809 Restaurant', amount: 161, date: '2025-07-28', week: '2025-W30'},
+                {driver: 'Rafa JR', business: 'Cana Stays', amount: 199, date: '2025-07-28', week: '2025-W30'},
+                {driver: 'Jeuris', business: 'Senor Bigote', amount: 39, date: '2025-07-28', week: '2025-W30'},
+                {driver: 'Jeuris', business: '809 Restaurant', amount: 36, date: '2025-07-28', week: '2025-W30'},
                 
-                {driver: 'Gabriel', amount: 0, date: '2025-08-04', week: '2025-W31'},
-                {driver: 'Rafa JR', amount: 222, date: '2025-08-04', week: '2025-W31'},
-                {driver: 'Jeuris', amount: 195, date: '2025-08-04', week: '2025-W31'},
+                // Week of July 28 - Aug 3, 2025 (Week 31) - No entries in data
                 
-                {driver: 'Gabriel', amount: 126, date: '2025-08-11', week: '2025-W32'},
-                {driver: 'Rafa JR', amount: 232, date: '2025-08-11', week: '2025-W32'},
-                {driver: 'Jeuris', amount: 478, date: '2025-08-11', week: '2025-W32'},
+                // Week of Aug 4-10, 2025 (Week 32) - No entries in data
                 
-                {driver: 'Gabriel', amount: 276, date: '2025-08-18', week: '2025-W33'},
-                {driver: 'Rafa JR', amount: 113, date: '2025-08-18', week: '2025-W33'},
-                {driver: 'Jeuris', amount: 117, date: '2025-08-18', week: '2025-W33'}
+                // Week of Aug 11-17, 2025 (Week 33) - CURRENT WEEK - NOT PAID YET
+                // Entries exist for Aug 11-15 but payments pending
             ],
             settings: {
                 amazonRate1: 2.00,
@@ -1137,16 +1190,14 @@
         });
 
         function initializeSystem() {
-            // Set today's date
-            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('bonusDate').value = new Date().toISOString().split('T')[0];
+            // Set today's date - August 16, 2025
+            const today = new Date('2025-08-16');
+            document.getElementById('entryDate').value = today.toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = today.toISOString().split('T')[0];
+            document.getElementById('bonusDate').value = today.toISOString().split('T')[0];
             
-            // Set current week for payouts
-            const now = new Date();
-            const year = now.getFullYear();
-            const weekNum = getWeekNumber(now);
-            document.getElementById('payoutWeek').value = `${year}-W${weekNum.toString().padStart(2, '0')}`;
+            // Set current week for payouts (Week 33: Aug 11-17, 2025)
+            document.getElementById('payoutWeek').value = '2025-W33';
             
             // Set default validation dates
             setDefaultValidationDates();
@@ -1231,20 +1282,36 @@
             }
         }
 
-        // Calculation functions
+        // Calculation functions with validation
         function calculateAmazonPay(packages) {
-            const rate1 = inwoodData.settings.amazonRate1;
-            const rate2 = inwoodData.settings.amazonRate2;
+            // Ensure packages is a valid number
+            packages = parseInt(packages) || 0;
+            if (packages < 0) packages = 0;
+            
+            const rate1 = parseFloat(inwoodData.settings.amazonRate1) || 2.00;
+            const rate2 = parseFloat(inwoodData.settings.amazonRate2) || 1.50;
             
             if (packages <= 25) {
-                return packages * rate1;
+                return Math.round(packages * rate1 * 100) / 100; // Round to 2 decimals
             } else {
-                return (25 * rate1) + ((packages - 25) * rate2);
+                return Math.round(((25 * rate1) + ((packages - 25) * rate2)) * 100) / 100;
             }
         }
 
         function calculateDriverPay(packages) {
-            return packages * inwoodData.settings.driverRate;
+            // Ensure packages is a valid number
+            packages = parseInt(packages) || 0;
+            if (packages < 0) packages = 0;
+            
+            const rate = parseFloat(inwoodData.settings.driverRate) || 1.00;
+            return Math.round(packages * rate * 100) / 100; // Round to 2 decimals
+        }
+        
+        function calculateProfit(amazonPay, driverPay) {
+            // Ensure both are valid numbers
+            amazonPay = parseFloat(amazonPay) || 0;
+            driverPay = parseFloat(driverPay) || 0;
+            return Math.round((amazonPay - driverPay) * 100) / 100; // Round to 2 decimals
         }
 
         // Entry management
@@ -1361,7 +1428,7 @@
             
             // Today's profit
             const todayProfit = todayEntries.reduce((sum, e) => sum + e.profit, 0);
-            document.getElementById('todayProfit').textContent = `$${todayProfit.toFixed(2)}`;
+            document.getElementById('todayProfit').textContent = `${todayProfit.toFixed(2)}`;
             
             // This week's total (including HCP and bonuses)
             const weekStart = getWeekStart(new Date());
@@ -1378,16 +1445,23 @@
             const weekBonuses = getBonusesForPeriod(weekStart, weekEnd);
             const totalWeek = weekProfit + weekHCP + weekBonuses;
             
-            document.getElementById('weekTotal').textContent = `$${totalWeek.toFixed(2)}`;
+            document.getElementById('weekTotal').textContent = `${totalWeek.toFixed(2)}`;
             
             // Outstanding payments (current week only)
             const outstanding = calculateCurrentWeekOutstanding();
-            document.getElementById('outstandingTotal').textContent = `$${outstanding.toFixed(2)}`;
+            document.getElementById('outstandingTotal').textContent = `${outstanding.toFixed(2)}`;
             
-            // Total historical (all-time profit + bonuses)
+            // Total historical (all-time profit + bonuses + HCP)
             const totalProfit = inwoodData.entries.reduce((sum, e) => sum + e.profit, 0);
             const totalBonuses = inwoodData.bonuses.reduce((sum, b) => sum + b.amount, 0);
-            document.getElementById('totalHistorical').textContent = `$${(totalProfit + totalBonuses).toFixed(2)}`;
+            
+            // Calculate total HCP from start of data to now
+            const firstEntry = inwoodData.entries.reduce((min, e) => 
+                e.date < min ? e.date : min, '2025-07-21');
+            const totalHCP = getHCPForPeriod(new Date(firstEntry), new Date());
+            
+            const totalHistorical = totalProfit + totalBonuses + totalHCP;
+            document.getElementById('totalHistorical').textContent = `${totalHistorical.toFixed(2)}`;
             
             // Recent deliveries table
             updateRecentDeliveries();
@@ -1681,19 +1755,21 @@
                 driverTotals[driver] = 0;
                 Object.keys(payouts[driver]).forEach(business => {
                     if (payouts[driver][business].packages > 0) {
-                        const isPaid = weekPayments.some(p => p.driver === driver) || !isCurrentWeek;
-                        const driverWeekTotal = Object.values(payouts[driver]).reduce((sum, b) => sum + b.amount, 0);
+                        // Check if THIS specific driver+business combination is paid
+                        const isPaid = weekPayments.some(p => 
+                            p.driver === driver && p.business === business
+                        );
                         
                         html += `
                             <tr>
                                 <td>${driver}</td>
                                 <td>${business}</td>
                                 <td>${payouts[driver][business].packages}</td>
-                                <td>$${payouts[driver][business].amount.toFixed(2)}</td>
+                                <td>${payouts[driver][business].amount.toFixed(2)}</td>
                                 <td>${isPaid ? '<span class="paid-badge">Paid</span>' : '<span class="pending-badge">Pending</span>'}</td>
                                 <td>
                                     <button class="action-btn breakdown" onclick="showPaymentBreakdown('${driver}', '${weekString}')">Breakdown</button>
-                                    ${!isPaid ? `<button class="action-btn pay" onclick="markDriverPaid('${driver}', '${weekString}', ${driverWeekTotal})">Mark Paid</button>` : ''}
+                                    ${!isPaid ? `<button class="action-btn pay" onclick="markBusinessPaid('${driver}', '${business}', '${weekString}', ${payouts[driver][business].amount})">Mark Paid</button>` : ''}
                                 </td>
                             </tr>
                         `;
@@ -1705,10 +1781,10 @@
             tbody.innerHTML = html;
             
             // Update driver totals
-            document.getElementById('gabrielTotal').textContent = `$${(driverTotals['Gabriel'] || 0).toFixed(2)}`;
-            document.getElementById('rafaTotal').textContent = `$${(driverTotals['Rafa JR'] || 0).toFixed(2)}`;
-            document.getElementById('jeurisTotal').textContent = `$${(driverTotals['Jeuris'] || 0).toFixed(2)}`;
-            document.getElementById('jamelTotal').textContent = `$${(driverTotals['Jamel'] || 0).toFixed(2)}`;
+            document.getElementById('gabrielTotal').textContent = `${(driverTotals['Gabriel'] || 0).toFixed(2)}`;
+            document.getElementById('rafaTotal').textContent = `${(driverTotals['Rafa JR'] || 0).toFixed(2)}`;
+            document.getElementById('jeurisTotal').textContent = `${(driverTotals['Jeuris'] || 0).toFixed(2)}`;
+            document.getElementById('jamelTotal').textContent = `${(driverTotals['Jamel'] || 0).toFixed(2)}`;
         }
 
         function showPaymentBreakdown(driver, weekString) {
@@ -1721,6 +1797,10 @@
                 const entryDate = new Date(e.date);
                 return entryDate >= weekStart && entryDate <= weekEnd && e.driver === driver;
             });
+            
+            const weekPayments = inwoodData.payments.filter(p => 
+                p.week === weekString && p.driver === driver
+            );
             
             // Group by business
             const businessBreakdown = {};
@@ -1739,12 +1819,24 @@
             content += `<div class="summary-grid" style="margin-top: 20px;">`;
             
             let total = 0;
+            let paidTotal = 0;
+            let pendingTotal = 0;
+            
             Object.entries(businessBreakdown).forEach(([business, amount]) => {
                 if (amount > 0) {
+                    const isPaid = weekPayments.some(p => p.business === business);
+                    const status = isPaid ? '<span class="paid-badge">Paid</span>' : '<span class="pending-badge">Pending</span>';
+                    
+                    if (isPaid) {
+                        paidTotal += amount;
+                    } else {
+                        pendingTotal += amount;
+                    }
+                    
                     content += `
                         <div class="summary-item">
-                            <h4>${business}</h4>
-                            <div class="amount">$${amount.toFixed(2)}</div>
+                            <h4>${business} ${status}</h4>
+                            <div class="amount">${amount.toFixed(2)}</div>
                         </div>
                     `;
                     total += amount;
@@ -1754,13 +1846,97 @@
             content += `
                 <div class="summary-item" style="border-left-color: #667eea;">
                     <h4>Total</h4>
-                    <div class="amount">$${total.toFixed(2)}</div>
+                    <div class="amount">${total.toFixed(2)}</div>
                 </div>
             `;
+            
+            if (pendingTotal > 0) {
+                content += `
+                    <div class="summary-item" style="border-left-color: #f6ad55;">
+                        <h4>Pending</h4>
+                        <div class="amount">${pendingTotal.toFixed(2)}</div>
+                    </div>
+                `;
+            }
+            
             content += `</div>`;
             
             document.getElementById('breakdownContent').innerHTML = content;
             document.getElementById('breakdownModal').style.display = 'block';
+        }
+
+        function payDriverAll(driver) {
+            const weekValue = document.getElementById('payoutWeek').value;
+            if (!weekValue) {
+                alert('Please select a week first');
+                return;
+            }
+            
+            const [year, week] = weekValue.split('-W');
+            const weekStart = getWeekStartFromWeekNumber(year, week);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            
+            const weekEntries = inwoodData.entries.filter(e => {
+                const entryDate = new Date(e.date);
+                return entryDate >= weekStart && entryDate <= weekEnd && e.driver === driver;
+            });
+            
+            // Group by business
+            const businessPayments = {};
+            let totalAmount = 0;
+            weekEntries.forEach(entry => {
+                if (!businessPayments[entry.business]) {
+                    businessPayments[entry.business] = 0;
+                }
+                businessPayments[entry.business] += entry.driverPay;
+                totalAmount += entry.driverPay;
+            });
+            
+            if (totalAmount === 0) {
+                alert(`No payments due for ${driver} this week`);
+                return;
+            }
+            
+            if (confirm(`Mark all businesses as paid for ${driver}? Total: ${totalAmount.toFixed(2)}`)) {
+                const weekString = `${year}-W${week.padStart(2, '0')}`;
+                const paymentDate = new Date().toISOString().split('T')[0];
+                
+                Object.keys(businessPayments).forEach(business => {
+                    if (businessPayments[business] > 0) {
+                        const payment = {
+                            driver: driver,
+                            business: business,
+                            amount: businessPayments[business],
+                            date: paymentDate,
+                            week: weekString
+                        };
+                        inwoodData.payments.push(payment);
+                    }
+                });
+                
+                saveData();
+                updatePayouts();
+                updateDriverPayments();
+                alert(`All businesses marked as paid for ${driver}!`);
+            }
+        }
+
+        function markBusinessPaid(driver, business, week, amount) {
+            const confirmAmount = prompt(`Enter payment amount for ${driver} - ${business}:`, amount.toFixed(2));
+            if (confirmAmount && !isNaN(confirmAmount)) {
+                const payment = {
+                    driver: driver,
+                    business: business,
+                    amount: parseFloat(confirmAmount),
+                    date: new Date().toISOString().split('T')[0],
+                    week: week
+                };
+                inwoodData.payments.push(payment);
+                saveData();
+                updatePayouts();
+                updateDriverPayments();
+            }
         }
 
         function markDriverPaid(driver, week, suggestedAmount) {
@@ -2361,9 +2537,232 @@
             window.URL.revokeObjectURL(url);
         }
 
+        // Verify and recalculate all entries
+        function verifyAllCalculations() {
+            let updated = 0;
+            inwoodData.entries.forEach(entry => {
+                const correctAmazonPay = calculateAmazonPay(entry.packages);
+                const correctDriverPay = calculateDriverPay(entry.packages);
+                const correctProfit = calculateProfit(correctAmazonPay, correctDriverPay);
+                
+                if (Math.abs(entry.amazonPay - correctAmazonPay) > 0.01 ||
+                    Math.abs(entry.driverPay - correctDriverPay) > 0.01 ||
+                    Math.abs(entry.profit - correctProfit) > 0.01) {
+                    
+                    entry.amazonPay = correctAmazonPay;
+                    entry.driverPay = correctDriverPay;
+                    entry.profit = correctProfit;
+                    updated++;
+                }
+            });
+            
+            if (updated > 0) {
+                saveData();
+                updateAllDisplays();
+                console.log(`Fixed ${updated} calculation errors`);
+            }
+            return updated;
+        }
+        
+        // Calculate weekly totals with verification
+        function calculateWeeklyTotals(weekStart, weekEnd) {
+            const totals = {
+                byDriver: {},
+                byBusiness: {},
+                byDriverBusiness: {},
+                totalPackages: 0,
+                totalAmazonPay: 0,
+                totalDriverPay: 0,
+                totalProfit: 0
+            };
+            
+            // Initialize structures
+            inwoodData.drivers.forEach(driver => {
+                totals.byDriver[driver] = {
+                    packages: 0,
+                    amazonPay: 0,
+                    driverPay: 0,
+                    profit: 0
+                };
+                totals.byDriverBusiness[driver] = {};
+                inwoodData.businesses.forEach(business => {
+                    totals.byDriverBusiness[driver][business.name] = {
+                        packages: 0,
+                        amazonPay: 0,
+                        driverPay: 0,
+                        profit: 0
+                    };
+                });
+            });
+            
+            inwoodData.businesses.forEach(business => {
+                totals.byBusiness[business.name] = {
+                    packages: 0,
+                    amazonPay: 0,
+                    driverPay: 0,
+                    profit: 0
+                };
+            });
+            
+            // Calculate totals
+            const weekEntries = inwoodData.entries.filter(e => {
+                const entryDate = new Date(e.date);
+                return entryDate >= weekStart && entryDate <= weekEnd;
+            });
+            
+            weekEntries.forEach(entry => {
+                // Verify calculations
+                const correctAmazonPay = calculateAmazonPay(entry.packages);
+                const correctDriverPay = calculateDriverPay(entry.packages);
+                const correctProfit = calculateProfit(correctAmazonPay, correctDriverPay);
+                
+                // Update totals
+                totals.totalPackages += entry.packages;
+                totals.totalAmazonPay += correctAmazonPay;
+                totals.totalDriverPay += correctDriverPay;
+                totals.totalProfit += correctProfit;
+                
+                // By driver
+                if (totals.byDriver[entry.driver]) {
+                    totals.byDriver[entry.driver].packages += entry.packages;
+                    totals.byDriver[entry.driver].amazonPay += correctAmazonPay;
+                    totals.byDriver[entry.driver].driverPay += correctDriverPay;
+                    totals.byDriver[entry.driver].profit += correctProfit;
+                }
+                
+                // By business
+                if (totals.byBusiness[entry.business]) {
+                    totals.byBusiness[entry.business].packages += entry.packages;
+                    totals.byBusiness[entry.business].amazonPay += correctAmazonPay;
+                    totals.byBusiness[entry.business].driverPay += correctDriverPay;
+                    totals.byBusiness[entry.business].profit += correctProfit;
+                }
+                
+                // By driver and business
+                if (totals.byDriverBusiness[entry.driver] && 
+                    totals.byDriverBusiness[entry.driver][entry.business]) {
+                    totals.byDriverBusiness[entry.driver][entry.business].packages += entry.packages;
+                    totals.byDriverBusiness[entry.driver][entry.business].amazonPay += correctAmazonPay;
+                    totals.byDriverBusiness[entry.driver][entry.business].driverPay += correctDriverPay;
+                    totals.byDriverBusiness[entry.driver][entry.business].profit += correctProfit;
+                }
+            });
+            
+            return totals;
+        }
+            if (!confirm('This will mark ALL past weeks as paid (except current week). Continue?')) {
+                return;
+            }
+            
+            const currentWeekStart = getWeekStart(new Date());
+            
+            // Get all unique week/driver/business combinations from entries
+            const paymentMap = new Map();
+            
+            inwoodData.entries.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                const entryWeekStart = getWeekStart(entryDate);
+                
+                // Skip current week entries
+                if (entryWeekStart.getTime() >= currentWeekStart.getTime()) {
+                    return;
+                }
+                
+                const weekString = getWeekStringFromDate(entryDate);
+                const key = `${weekString}-${entry.driver}-${entry.business}`;
+                
+                if (!paymentMap.has(key)) {
+                    paymentMap.set(key, {
+                        driver: entry.driver,
+                        business: entry.business,
+                        week: weekString,
+                        amount: 0,
+                        weekStart: entryWeekStart
+                    });
+                }
+                
+                paymentMap.get(key).amount += entry.driverPay;
+            });
+            
+            // Clear existing payments for past weeks
+            inwoodData.payments = inwoodData.payments.filter(p => {
+                const [year, week] = p.week.split('-W');
+                const paymentWeekStart = getWeekStartFromWeekNumber(year, week);
+                return paymentWeekStart.getTime() >= currentWeekStart.getTime();
+            });
+            
+            // Add all past week payments
+            paymentMap.forEach((payment) => {
+                inwoodData.payments.push({
+                    driver: payment.driver,
+                    business: payment.business,
+                    amount: payment.amount,
+                    date: new Date(payment.weekStart.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Monday after the week
+                    week: payment.week
+                });
+            });
+            
+            saveData();
+            updatePayouts();
+            updateDriverPayments();
+            updateDashboard();
+            
+            alert('All past weeks have been marked as paid! Only the current week remains pending.');
+        }
+
         function markAllPaid() {
-            if (confirm('Mark all current week payments as paid?')) {
-                alert('Payments marked as paid successfully!');
+            const weekValue = document.getElementById('payoutWeek').value;
+            if (!weekValue) {
+                alert('Please select a week first');
+                return;
+            }
+            
+            if (confirm('Mark all drivers and businesses as paid for this week?')) {
+                const [year, week] = weekValue.split('-W');
+                const weekStart = getWeekStartFromWeekNumber(year, week);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                
+                const weekEntries = inwoodData.entries.filter(e => {
+                    const entryDate = new Date(e.date);
+                    return entryDate >= weekStart && entryDate <= weekEnd;
+                });
+                
+                // Group by driver and business
+                const payouts = {};
+                weekEntries.forEach(entry => {
+                    if (!payouts[entry.driver]) {
+                        payouts[entry.driver] = {};
+                    }
+                    if (!payouts[entry.driver][entry.business]) {
+                        payouts[entry.driver][entry.business] = 0;
+                    }
+                    payouts[entry.driver][entry.business] += entry.driverPay;
+                });
+                
+                const weekString = `${year}-W${week.padStart(2, '0')}`;
+                const paymentDate = new Date().toISOString().split('T')[0];
+                
+                // Create payment records for each driver+business combination
+                Object.keys(payouts).forEach(driver => {
+                    Object.keys(payouts[driver]).forEach(business => {
+                        if (payouts[driver][business] > 0) {
+                            const payment = {
+                                driver: driver,
+                                business: business,
+                                amount: payouts[driver][business],
+                                date: paymentDate,
+                                week: weekString
+                            };
+                            inwoodData.payments.push(payment);
+                        }
+                    });
+                });
+                
+                saveData();
+                updatePayouts();
+                updateDriverPayments();
+                alert('All payments marked as paid successfully!');
             }
         }
 
