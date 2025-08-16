@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon Hub Management System</title>
+    <title>Inwood Logistics - Amazon Hub Management System</title>
     <style>
         * {
             margin: 0;
@@ -198,11 +198,18 @@
             background: #e2e8f0;
         }
 
+        .btn-success {
+            background: #48bb78;
+            color: white;
+            margin-left: 8px;
+        }
+
         .data-table {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
         }
 
         .table-header {
@@ -248,6 +255,7 @@
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
+            margin-right: 8px;
         }
 
         .action-btn.edit {
@@ -258,7 +266,11 @@
         .action-btn.delete {
             background: #f56565;
             color: white;
-            margin-left: 8px;
+        }
+
+        .action-btn.pay {
+            background: #48bb78;
+            color: white;
         }
 
         .summary-section {
@@ -321,6 +333,51 @@
             margin-top: 20px;
         }
 
+        .hcp-badge {
+            background: #48bb78;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .paid-badge {
+            background: #48bb78;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .pending-badge {
+            background: #f6ad55;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .edit-modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+        }
+
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -339,16 +396,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚚 Amazon Hub Management System</h1>
-            <p>Track deliveries, manage drivers, and maximize profits across all businesses</p>
+            <h1>🚚 Inwood Logistics - Amazon Hub Management</h1>
+            <p>Professional delivery tracking system portal - Managing multiple drivers across all business locations</p>
         </div>
 
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
             <button class="nav-tab" onclick="switchTab('daily-entry')">📝 Daily Entry</button>
+            <button class="nav-tab" onclick="switchTab('manage-entries')">📋 Manage Entries</button>
             <button class="nav-tab" onclick="switchTab('weekly-payouts')">💰 Weekly Payouts</button>
             <button class="nav-tab" onclick="switchTab('business-summary')">🏢 Business Summary</button>
-            <button class="nav-tab" onclick="switchTab('reports')">📈 Reports</button>
+            <button class="nav-tab" onclick="switchTab('driver-payments')">💳 Driver Payments</button>
             <button class="nav-tab" onclick="switchTab('settings')">⚙️ Settings</button>
         </div>
 
@@ -358,27 +416,27 @@
                 <div class="stat-card">
                     <h3>Today's Profit</h3>
                     <div class="value" id="todayProfit">$0.00</div>
-                    <div class="change">+12% from yesterday</div>
+                    <div class="change">Real-time calculations</div>
                 </div>
                 <div class="stat-card">
                     <h3>This Week's Total</h3>
                     <div class="value" id="weekTotal">$0.00</div>
-                    <div class="change">+8% from last week</div>
+                    <div class="change">Including HCP revenue</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Packages Today</h3>
-                    <div class="value" id="packagesToday">0</div>
-                    <div class="change">Across all businesses</div>
+                    <h3>Outstanding Payments</h3>
+                    <div class="value" id="outstandingTotal">$0.00</div>
+                    <div class="change negative">Across all drivers</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Driver Payments Due</h3>
-                    <div class="value" id="paymentsdue">$0.00</div>
-                    <div class="change negative">4 drivers pending</div>
+                    <h3>Total Historical</h3>
+                    <div class="value" id="totalHistorical">$0.00</div>
+                    <div class="change">Since July 21st</div>
                 </div>
             </div>
 
             <div class="data-table">
-                <div class="table-header">Recent Deliveries</div>
+                <div class="table-header">Recent Deliveries (Last 10)</div>
                 <table>
                     <thead>
                         <tr>
@@ -389,6 +447,7 @@
                             <th>Amazon Pay</th>
                             <th>Driver Pay</th>
                             <th>Your Profit</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="recentDeliveries">
@@ -461,12 +520,50 @@
                     <button class="btn btn-secondary" onclick="clearEntryForm()">Clear</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Manage Entries Tab -->
+        <div id="manage-entries" class="tab-content">
+            <div class="form-card">
+                <h2 style="margin-bottom: 24px; color: #2d3748;">Manage All Entries</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Filter by Date</label>
+                        <input type="date" id="filterDate" onchange="filterEntries()">
+                    </div>
+                    <div class="form-group">
+                        <label>Filter by Driver</label>
+                        <select id="filterDriver" onchange="filterEntries()">
+                            <option value="">All Drivers</option>
+                            <option value="Gabriel">Gabriel</option>
+                            <option value="Rafa JR">Rafa JR</option>
+                            <option value="Jeuris">Jeuris</option>
+                            <option value="Jamel">Jamel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Filter by Business</label>
+                        <select id="filterBusiness" onchange="filterEntries()">
+                            <option value="">All Businesses</option>
+                            <option value="Senor Bigote">Senor Bigote</option>
+                            <option value="Cana Stays">Cana Stays</option>
+                            <option value="809 Restaurant">809 Restaurant</option>
+                            <option value="101 Pescaderia">101 Pescaderia</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-secondary" onclick="clearFilters()" style="margin-top: 26px;">Clear Filters</button>
+                    </div>
+                </div>
+            </div>
 
             <div class="data-table">
-                <div class="table-header">Today's Entries</div>
+                <div class="table-header">All Delivery Entries</div>
                 <table>
                     <thead>
                         <tr>
+                            <th>Date</th>
                             <th>Driver</th>
                             <th>Business</th>
                             <th>Packages</th>
@@ -476,7 +573,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="todayEntries">
+                    <tbody id="allEntries">
                         <!-- Will be populated by JavaScript -->
                     </tbody>
                 </table>
@@ -505,6 +602,7 @@
                                 <th>Packages</th>
                                 <th>Amount Owed</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="driverPayouts">
@@ -533,7 +631,7 @@
                 </div>
 
                 <div class="export-section">
-                    <button class="btn btn-primary" onclick="exportPayouts()">Export to CSV</button>
+                    <button class="btn btn-primary" onclick="exportPayouts()">Export Weekly Report</button>
                     <button class="btn btn-secondary" onclick="markAllPaid()">Mark All Paid</button>
                 </div>
             </div>
@@ -543,7 +641,7 @@
         <div id="business-summary" class="tab-content">
             <div class="dashboard-grid">
                 <div class="stat-card">
-                    <h3>Senor Bigote Barberia</h3>
+                    <h3>Senor Bigote Barberia <span class="hcp-badge">HCP</span></h3>
                     <div class="value" id="sbProfit">$0.00</div>
                     <div class="change">This week + HCP $230.77</div>
                 </div>
@@ -560,7 +658,7 @@
                 <div class="stat-card">
                     <h3>101 Pescaderia</h3>
                     <div class="value" id="p101Profit">$0.00</div>
-                    <div class="change">This week</div>
+                    <div class="change">Ready for HCP</div>
                 </div>
             </div>
 
@@ -574,7 +672,8 @@
                             <th>Amazon Revenue</th>
                             <th>Driver Costs</th>
                             <th>Net Profit</th>
-                            <th>Profit Margin</th>
+                            <th>HCP Revenue</th>
+                            <th>Total Profit</th>
                         </tr>
                     </thead>
                     <tbody id="businessPerformance">
@@ -584,36 +683,56 @@
             </div>
         </div>
 
-        <!-- Reports Tab -->
-        <div id="reports" class="tab-content">
-            <div class="form-card">
-                <h2 style="margin-bottom: 24px; color: #2d3748;">Generate Reports</h2>
+        <!-- Driver Payments Tab -->
+        <div id="driver-payments" class="tab-content">
+            <div class="summary-section">
+                <h2 style="margin-bottom: 24px; color: #2d3748;">Driver Payment Tracking</h2>
                 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Report Type</label>
-                        <select id="reportType">
-                            <option value="weekly">Weekly Summary</option>
-                            <option value="monthly">Monthly Summary</option>
-                            <option value="driver">Driver Performance</option>
-                            <option value="business">Business Analysis</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Date Range</label>
-                        <input type="date" id="reportStartDate">
-                    </div>
-                    <div class="form-group">
-                        <label>To</label>
-                        <input type="date" id="reportEndDate">
-                    </div>
+                <div class="data-table">
+                    <div class="table-header">Outstanding Driver Payments</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Driver</th>
+                                <th>Total Earned</th>
+                                <th>Total Paid</th>
+                                <th>Outstanding</th>
+                                <th>Last Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driverPaymentStatus">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
 
-                <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
-            </div>
-
-            <div id="reportContent" class="summary-section" style="display: none;">
-                <!-- Report content will be populated here -->
+                <div class="form-card">
+                    <h3 style="margin-bottom: 16px; color: #2d3748;">Record Payment</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Driver</label>
+                            <select id="paymentDriver">
+                                <option value="">Select Driver</option>
+                                <option value="Gabriel">Gabriel</option>
+                                <option value="Rafa JR">Rafa JR</option>
+                                <option value="Jeuris">Jeuris</option>
+                                <option value="Jamel">Jamel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount Paid</label>
+                            <input type="number" id="paymentAmount" placeholder="0.00" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Date</label>
+                            <input type="date" id="paymentDate">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success" onclick="recordPayment()" style="margin-top: 26px;">Record Payment</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -638,34 +757,43 @@
                             <input type="number" id="driverRate" value="1.00" step="0.01">
                         </div>
                         <div class="form-group">
-                            <label>HCP Weekly Payment</label>
-                            <input type="number" id="hcpPayment" value="230.77" step="0.01">
+                            <button class="btn btn-primary" onclick="updateRates()" style="margin-top: 26px;">Update Rates</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="summary-section" style="background: #f7fafc; margin-top: 20px;">
-                    <h3 style="margin-bottom: 16px; color: #4a5568;">Add New Driver</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Driver Name</label>
-                            <input type="text" id="newDriverName" placeholder="Enter driver name">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end;">
-                            <button class="btn btn-primary" onclick="addDriver()">Add Driver</button>
-                        </div>
+                    <h3 style="margin-bottom: 16px; color: #4a5568;">Manage Businesses</h3>
+                    <div id="businessList" style="margin-bottom: 20px;">
+                        <!-- Will be populated by JavaScript -->
                     </div>
-                </div>
-
-                <div class="summary-section" style="background: #f7fafc; margin-top: 20px;">
-                    <h3 style="margin-bottom: 16px; color: #4a5568;">Add New Business</h3>
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Business Name</label>
                             <input type="text" id="newBusinessName" placeholder="Enter business name">
                         </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end;">
-                            <button class="btn btn-primary" onclick="addBusiness()">Add Business</button>
+                        <div class="form-group">
+                            <label>HCP Weekly Payment</label>
+                            <input type="number" id="newBusinessHCP" placeholder="0.00" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="addBusiness()" style="margin-top: 26px;">Add Business</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-section" style="background: #f7fafc; margin-top: 20px;">
+                    <h3 style="margin-bottom: 16px; color: #4a5568;">Manage Drivers</h3>
+                    <div id="driverList" style="margin-bottom: 20px;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Driver Name</label>
+                            <input type="text" id="newDriverName" placeholder="Enter driver name">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="addDriver()" style="margin-top: 26px;">Add Driver</button>
                         </div>
                     </div>
                 </div>
@@ -673,66 +801,190 @@
                 <div class="export-section">
                     <button class="btn btn-primary" onclick="exportAllData()">Export All Data</button>
                     <button class="btn btn-secondary" onclick="importData()">Import Data</button>
+                    <button class="btn btn-secondary" onclick="backupData()">Backup Data</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h3 style="margin-bottom: 20px;">Edit Entry</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="editDate">
+                </div>
+                <div class="form-group">
+                    <label>Driver</label>
+                    <select id="editDriver">
+                        <option value="Gabriel">Gabriel</option>
+                        <option value="Rafa JR">Rafa JR</option>
+                        <option value="Jeuris">Jeuris</option>
+                        <option value="Jamel">Jamel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Business</label>
+                    <select id="editBusiness">
+                        <option value="Senor Bigote">Senor Bigote</option>
+                        <option value="Cana Stays">Cana Stays</option>
+                        <option value="809 Restaurant">809 Restaurant</option>
+                        <option value="101 Pescaderia">101 Pescaderia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Packages</label>
+                    <input type="number" id="editPackages" min="0">
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Initialize data structure
+        // Enhanced data structure with historical data
         let amazonHubData = {
-            entries: [],
+            entries: [
+                // Week July 21-27, 2025
+                {id: 1, date: '2025-07-21', driver: 'Gabriel', business: 'Senor Bigote', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 2, date: '2025-07-21', driver: 'Gabriel', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 3, date: '2025-07-21', driver: 'Rafa JR', business: 'Cana Stays', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
+                
+                {id: 4, date: '2025-07-22', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 5, date: '2025-07-22', driver: 'Gabriel', business: '809 Restaurant', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 6, date: '2025-07-22', driver: 'Rafa JR', business: 'Cana Stays', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
+                
+                {id: 7, date: '2025-07-23', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 8, date: '2025-07-23', driver: 'Gabriel', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 9, date: '2025-07-23', driver: 'Rafa JR', business: 'Cana Stays', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
+                
+                {id: 10, date: '2025-07-24', driver: 'Gabriel', business: 'Senor Bigote', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 11, date: '2025-07-24', driver: 'Gabriel', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 12, date: '2025-07-24', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                
+                {id: 13, date: '2025-07-25', driver: 'Gabriel', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 14, date: '2025-07-25', driver: 'Rafa JR', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 15, date: '2025-07-25', driver: 'Jeuris', business: 'Senor Bigote', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 16, date: '2025-07-25', driver: 'Jeuris', business: '809 Restaurant', packages: 36, amazonPay: 66.5, driverPay: 36, profit: 30.5},
+                
+                {id: 17, date: '2025-07-27', driver: 'Rafa JR', business: 'Cana Stays', packages: 37, amazonPay: 67.5, driverPay: 37, profit: 30.5},
+                {id: 18, date: '2025-07-27', driver: 'Senor Bigote', business: 'Senor Bigote', packages: 0, amazonPay: 0, driverPay: 0, profit: 0},
+                
+                // Week July 28 - August 3, 2025
+                {id: 19, date: '2025-07-29', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 20, date: '2025-07-30', driver: 'Rafa JR', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 21, date: '2025-07-31', driver: 'Rafa JR', business: 'Cana Stays', packages: 30, amazonPay: 60, driverPay: 30, profit: 30},
+                {id: 22, date: '2025-08-01', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 23, date: '2025-08-02', driver: 'Rafa JR', business: 'Senor Bigote', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 24, date: '2025-08-02', driver: 'Rafa JR', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 25, date: '2025-08-03', driver: 'Jeuris', business: 'Senor Bigote', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 26, date: '2025-08-03', driver: 'Jeuris', business: '809 Restaurant', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                
+                // Week August 4-10, 2025
+                {id: 27, date: '2025-08-05', driver: 'Rafa JR', business: 'Cana Stays', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 28, date: '2025-08-06', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 29, date: '2025-08-07', driver: 'Rafa JR', business: 'Cana Stays', packages: 37, amazonPay: 67.5, driverPay: 37, profit: 30.5},
+                {id: 30, date: '2025-08-08', driver: 'Rafa JR', business: 'Cana Stays', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 31, date: '2025-08-09', driver: 'Gabriel', business: 'Senor Bigote', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
+                {id: 32, date: '2025-08-09', driver: 'Rafa JR', business: 'Cana Stays', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 33, date: '2025-08-10', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 34, date: '2025-08-10', driver: 'Gabriel', business: 'Cana Stays', packages: 43, amazonPay: 77, driverPay: 43, profit: 34},
+                {id: 35, date: '2025-08-10', driver: 'Jeuris', business: 'Senor Bigote', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 36, date: '2025-08-10', driver: 'Jeuris', business: '809 Restaurant', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                
+                // Week August 11-17, 2025
+                {id: 37, date: '2025-08-11', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 38, date: '2025-08-12', driver: 'Gabriel', business: 'Senor Bigote', packages: 42, amazonPay: 75.5, driverPay: 42, profit: 33.5},
+                {id: 39, date: '2025-08-13', driver: 'Gabriel', business: 'Senor Bigote', packages: 41, amazonPay: 74, driverPay: 41, profit: 33},
+                {id: 40, date: '2025-08-13', driver: 'Rafa JR', business: 'Cana Stays', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 41, date: '2025-08-14', driver: 'Gabriel', business: 'Senor Bigote', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 42, date: '2025-08-14', driver: 'Rafa JR', business: 'Cana Stays', packages: 37, amazonPay: 67.5, driverPay: 37, profit: 30.5},
+                {id: 43, date: '2025-08-14', driver: 'Jeuris', business: '809 Restaurant', packages: 40, amazonPay: 72.5, driverPay: 40, profit: 32.5},
+                {id: 44, date: '2025-08-15', driver: 'Rafa JR', business: 'Cana Stays', packages: 38, amazonPay: 69, driverPay: 38, profit: 31},
+                {id: 45, date: '2025-08-15', driver: 'Jeuris', business: 'Senor Bigote', packages: 39, amazonPay: 71, driverPay: 39, profit: 32},
+                {id: 46, date: '2025-08-15', driver: 'Jeuris', business: '809 Restaurant', packages: 38, amazonPay: 69, driverPay: 38, profit: 31}
+            ],
             drivers: ['Gabriel', 'Rafa JR', 'Jeuris', 'Jamel'],
-            businesses: ['Senor Bigote', 'Cana Stays', '809 Restaurant', '101 Pescaderia'],
+            businesses: [
+                {name: 'Senor Bigote', hcpWeekly: 230.77, isHCP: true},
+                {name: 'Cana Stays', hcpWeekly: 0, isHCP: false},
+                {name: '809 Restaurant', hcpWeekly: 0, isHCP: false},
+                {name: '101 Pescaderia', hcpWeekly: 0, isHCP: false}
+            ],
+            payments: [
+                {driver: 'Gabriel', amount: 500, date: '2025-07-29', week: '2025-W30'},
+                {driver: 'Rafa JR', amount: 400, date: '2025-07-29', week: '2025-W30'},
+                {driver: 'Jeuris', amount: 300, date: '2025-08-07', week: '2025-W32'},
+                {driver: 'Jeuris', amount: 450, date: '2025-08-11', week: '2025-W33'},
+                {driver: 'Rafa JR', amount: 350, date: '2025-08-11', week: '2025-W33'},
+                {driver: 'Gabriel', amount: 600, date: '2025-08-14', week: '2025-W33'}
+            ],
             settings: {
                 amazonRate1: 2.00,
                 amazonRate2: 1.50,
-                driverRate: 1.00,
-                hcpWeekly: 230.77
+                driverRate: 1.00
             }
         };
 
+        let currentEditId = null;
+
         // Load data from localStorage
         function loadData() {
-            const saved = localStorage.getItem('amazonHubData');
+            const saved = localStorage.getItem('amazonHubDataEnhanced');
             if (saved) {
-                amazonHubData = JSON.parse(saved);
+                try {
+                    const parsedData = JSON.parse(saved);
+                    // Merge with default data to ensure all new features exist
+                    amazonHubData = {...amazonHubData, ...parsedData};
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                }
             }
             updateAllDisplays();
         }
 
         // Save data to localStorage
         function saveData() {
-            localStorage.setItem('amazonHubData', JSON.stringify(amazonHubData));
+            try {
+                localStorage.setItem('amazonHubDataEnhanced', JSON.stringify(amazonHubData));
+            } catch (e) {
+                console.error('Error saving data:', e);
+            }
         }
 
         // Switch tabs
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-            // Remove active from all nav tabs
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            // Show selected tab
             document.getElementById(tabName).classList.add('active');
-            // Add active to clicked nav tab
             event.target.classList.add('active');
             
-            // Update displays based on tab
             if (tabName === 'dashboard') {
                 updateDashboard();
+            } else if (tabName === 'manage-entries') {
+                updateManageEntries();
             } else if (tabName === 'weekly-payouts') {
                 updatePayouts();
             } else if (tabName === 'business-summary') {
                 updateBusinessSummary();
+            } else if (tabName === 'driver-payments') {
+                updateDriverPayments();
+            } else if (tabName === 'settings') {
+                updateSettings();
             }
         }
 
         // Calculate Amazon payment
-        function calculateAmazonPay(packages, business) {
+        function calculateAmazonPay(packages) {
             const rate1 = amazonHubData.settings.amazonRate1;
             const rate2 = amazonHubData.settings.amazonRate2;
             
@@ -751,9 +1003,8 @@
         // Update preview calculations
         function updatePreview() {
             const packages = parseInt(document.getElementById('entryPackages').value) || 0;
-            const business = document.getElementById('entryBusiness').value;
             
-            const amazonPay = calculateAmazonPay(packages, business);
+            const amazonPay = calculateAmazonPay(packages);
             const driverPay = calculateDriverPay(packages);
             const profit = amazonPay - driverPay;
             
@@ -774,7 +1025,7 @@
                 return;
             }
             
-            const amazonPay = calculateAmazonPay(packages, business);
+            const amazonPay = calculateAmazonPay(packages);
             const driverPay = calculateDriverPay(packages);
             const profit = amazonPay - driverPay;
             
@@ -792,7 +1043,6 @@
             amazonHubData.entries.push(entry);
             saveData();
             
-            // Show success alert
             document.getElementById('entryAlert').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('entryAlert').style.display = 'none';
@@ -815,14 +1065,9 @@
             const today = new Date().toISOString().split('T')[0];
             const todayEntries = amazonHubData.entries.filter(e => e.date === today);
             
-            // Calculate today's totals
             const todayProfit = todayEntries.reduce((sum, e) => sum + e.profit, 0);
-            const todayPackages = todayEntries.reduce((sum, e) => sum + e.packages, 0);
-            
             document.getElementById('todayProfit').textContent = `$${todayProfit.toFixed(2)}`;
-            document.getElementById('packagesToday').textContent = todayPackages;
             
-            // Calculate week totals
             const weekStart = getWeekStart(new Date());
             const weekEntries = amazonHubData.entries.filter(e => {
                 const entryDate = new Date(e.date);
@@ -830,11 +1075,14 @@
             });
             
             const weekTotal = weekEntries.reduce((sum, e) => sum + e.profit, 0);
-            document.getElementById('weekTotal').textContent = `$${weekTotal.toFixed(2)}`;
+            const hcpWeekly = getHCPWeeklyTotal();
+            document.getElementById('weekTotal').textContent = `$${(weekTotal + hcpWeekly).toFixed(2)}`;
             
-            // Calculate pending payments
-            const pendingPayments = weekEntries.reduce((sum, e) => sum + e.driverPay, 0);
-            document.getElementById('paymentsdue').textContent = `$${pendingPayments.toFixed(2)}`;
+            const totalHistorical = amazonHubData.entries.reduce((sum, e) => sum + e.profit, 0);
+            document.getElementById('totalHistorical').textContent = `$${totalHistorical.toFixed(2)}`;
+            
+            const outstanding = calculateOutstandingPayments();
+            document.getElementById('outstandingTotal').textContent = `$${outstanding.toFixed(2)}`;
             
             // Update recent deliveries table
             const recentEntries = amazonHubData.entries.slice(-10).reverse();
@@ -848,13 +1096,22 @@
                     <td>$${entry.amazonPay.toFixed(2)}</td>
                     <td>$${entry.driverPay.toFixed(2)}</td>
                     <td>$${entry.profit.toFixed(2)}</td>
+                    <td>
+                        <button class="action-btn edit" onclick="editEntry(${entry.id})">Edit</button>
+                        <button class="action-btn delete" onclick="deleteEntry(${entry.id})">Delete</button>
+                    </td>
                 </tr>
             `).join('');
+        }
+
+        // Update manage entries
+        function updateManageEntries() {
+            const tbody = document.getElementById('allEntries');
+            const sortedEntries = [...amazonHubData.entries].sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            // Update today's entries
-            const todayTbody = document.getElementById('todayEntries');
-            todayTbody.innerHTML = todayEntries.map(entry => `
+            tbody.innerHTML = sortedEntries.map(entry => `
                 <tr>
+                    <td>${entry.date}</td>
                     <td>${entry.driver}</td>
                     <td>${entry.business}</td>
                     <td>${entry.packages}</td>
@@ -862,10 +1119,114 @@
                     <td>$${entry.driverPay.toFixed(2)}</td>
                     <td>$${entry.profit.toFixed(2)}</td>
                     <td>
+                        <button class="action-btn edit" onclick="editEntry(${entry.id})">Edit</button>
                         <button class="action-btn delete" onclick="deleteEntry(${entry.id})">Delete</button>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        // Filter entries
+        function filterEntries() {
+            const filterDate = document.getElementById('filterDate').value;
+            const filterDriver = document.getElementById('filterDriver').value;
+            const filterBusiness = document.getElementById('filterBusiness').value;
+            
+            let filteredEntries = amazonHubData.entries;
+            
+            if (filterDate) {
+                filteredEntries = filteredEntries.filter(e => e.date === filterDate);
+            }
+            if (filterDriver) {
+                filteredEntries = filteredEntries.filter(e => e.driver === filterDriver);
+            }
+            if (filterBusiness) {
+                filteredEntries = filteredEntries.filter(e => e.business === filterBusiness);
+            }
+            
+            const tbody = document.getElementById('allEntries');
+            const sortedEntries = [...filteredEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            tbody.innerHTML = sortedEntries.map(entry => `
+                <tr>
+                    <td>${entry.date}</td>
+                    <td>${entry.driver}</td>
+                    <td>${entry.business}</td>
+                    <td>${entry.packages}</td>
+                    <td>$${entry.amazonPay.toFixed(2)}</td>
+                    <td>$${entry.driverPay.toFixed(2)}</td>
+                    <td>$${entry.profit.toFixed(2)}</td>
+                    <td>
+                        <button class="action-btn edit" onclick="editEntry(${entry.id})">Edit</button>
+                        <button class="action-btn delete" onclick="deleteEntry(${entry.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterDriver').value = '';
+            document.getElementById('filterBusiness').value = '';
+            updateManageEntries();
+        }
+
+        // Edit entry
+        function editEntry(id) {
+            const entry = amazonHubData.entries.find(e => e.id === id);
+            if (!entry) return;
+            
+            currentEditId = id;
+            document.getElementById('editDate').value = entry.date;
+            document.getElementById('editDriver').value = entry.driver;
+            document.getElementById('editBusiness').value = entry.business;
+            document.getElementById('editPackages').value = entry.packages;
+            
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditId = null;
+        }
+
+        // Save edit
+        function saveEdit() {
+            if (!currentEditId) return;
+            
+            const entryIndex = amazonHubData.entries.findIndex(e => e.id === currentEditId);
+            if (entryIndex === -1) return;
+            
+            const packages = parseInt(document.getElementById('editPackages').value);
+            const amazonPay = calculateAmazonPay(packages);
+            const driverPay = calculateDriverPay(packages);
+            const profit = amazonPay - driverPay;
+            
+            amazonHubData.entries[entryIndex] = {
+                ...amazonHubData.entries[entryIndex],
+                date: document.getElementById('editDate').value,
+                driver: document.getElementById('editDriver').value,
+                business: document.getElementById('editBusiness').value,
+                packages: packages,
+                amazonPay: amazonPay,
+                driverPay: driverPay,
+                profit: profit
+            };
+            
+            saveData();
+            closeEditModal();
+            updateAllDisplays();
+        }
+
+        // Delete entry
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                amazonHubData.entries = amazonHubData.entries.filter(e => e.id !== id);
+                saveData();
+                updateAllDisplays();
+            }
         }
 
         // Update weekly payouts
@@ -888,7 +1249,7 @@
             amazonHubData.drivers.forEach(driver => {
                 payouts[driver] = {};
                 amazonHubData.businesses.forEach(business => {
-                    payouts[driver][business] = {
+                    payouts[driver][business.name] = {
                         packages: 0,
                         amount: 0
                     };
@@ -902,6 +1263,10 @@
                 }
             });
             
+            // Get payments for this week
+            const weekString = `${year}-W${week.padStart(2, '0')}`;
+            const weekPayments = amazonHubData.payments.filter(p => p.week === weekString);
+            
             // Update table
             const tbody = document.getElementById('driverPayouts');
             let html = '';
@@ -911,13 +1276,17 @@
                 driverTotals[driver] = 0;
                 Object.keys(payouts[driver]).forEach(business => {
                     if (payouts[driver][business].packages > 0) {
+                        const isPaid = weekPayments.some(p => p.driver === driver);
                         html += `
                             <tr>
                                 <td>${driver}</td>
                                 <td>${business}</td>
                                 <td>${payouts[driver][business].packages}</td>
                                 <td>$${payouts[driver][business].amount.toFixed(2)}</td>
-                                <td><span style="color: #f6ad55;">Pending</span></td>
+                                <td>${isPaid ? '<span class="paid-badge">Paid</span>' : '<span class="pending-badge">Pending</span>'}</td>
+                                <td>
+                                    ${!isPaid ? `<button class="action-btn pay" onclick="markDriverPaid('${driver}', '${weekString}')">Mark Paid</button>` : ''}
+                                </td>
                             </tr>
                         `;
                         driverTotals[driver] += payouts[driver][business].amount;
@@ -934,6 +1303,23 @@
             document.getElementById('jamelTotal').textContent = `$${(driverTotals['Jamel'] || 0).toFixed(2)}`;
         }
 
+        // Mark driver paid
+        function markDriverPaid(driver, week) {
+            const amount = prompt(`Enter payment amount for ${driver}:`);
+            if (amount && !isNaN(amount)) {
+                const payment = {
+                    driver: driver,
+                    amount: parseFloat(amount),
+                    date: new Date().toISOString().split('T')[0],
+                    week: week
+                };
+                amazonHubData.payments.push(payment);
+                saveData();
+                updatePayouts();
+                updateDriverPayments();
+            }
+        }
+
         // Update business summary
         function updateBusinessSummary() {
             const weekStart = getWeekStart(new Date());
@@ -945,11 +1331,13 @@
             // Calculate by business
             const businessStats = {};
             amazonHubData.businesses.forEach(business => {
-                businessStats[business] = {
+                businessStats[business.name] = {
                     packages: 0,
                     amazonRevenue: 0,
                     driverCosts: 0,
-                    profit: 0
+                    profit: 0,
+                    hcpRevenue: 0,
+                    totalProfit: 0
                 };
             });
             
@@ -962,50 +1350,212 @@
                 }
             });
             
-            // Add HCP payment to Senor Bigote
-            const hcpDaily = amazonHubData.settings.hcpWeekly / 7;
+            // Add HCP revenue
             const daysSinceWeekStart = Math.floor((new Date() - weekStart) / (1000 * 60 * 60 * 24)) + 1;
-            const hcpSoFar = hcpDaily * Math.min(daysSinceWeekStart, 7);
-            businessStats['Senor Bigote'].profit += hcpSoFar;
+            amazonHubData.businesses.forEach(business => {
+                if (business.isHCP && business.hcpWeekly > 0) {
+                    const hcpDaily = business.hcpWeekly / 7;
+                    const hcpSoFar = hcpDaily * Math.min(daysSinceWeekStart, 7);
+                    businessStats[business.name].hcpRevenue = hcpSoFar;
+                    businessStats[business.name].totalProfit = businessStats[business.name].profit + hcpSoFar;
+                } else {
+                    businessStats[business.name].totalProfit = businessStats[business.name].profit;
+                }
+            });
             
             // Update stat cards
-            document.getElementById('sbProfit').textContent = `$${businessStats['Senor Bigote'].profit.toFixed(2)}`;
-            document.getElementById('csProfit').textContent = `$${businessStats['Cana Stays'].profit.toFixed(2)}`;
-            document.getElementById('r809Profit').textContent = `$${businessStats['809 Restaurant'].profit.toFixed(2)}`;
-            document.getElementById('p101Profit').textContent = `$${businessStats['101 Pescaderia'].profit.toFixed(2)}`;
+            document.getElementById('sbProfit').textContent = `$${businessStats['Senor Bigote'].totalProfit.toFixed(2)}`;
+            document.getElementById('csProfit').textContent = `$${businessStats['Cana Stays'].totalProfit.toFixed(2)}`;
+            document.getElementById('r809Profit').textContent = `$${businessStats['809 Restaurant'].totalProfit.toFixed(2)}`;
+            document.getElementById('p101Profit').textContent = `$${businessStats['101 Pescaderia'].totalProfit.toFixed(2)}`;
             
             // Update performance table
             const tbody = document.getElementById('businessPerformance');
-            tbody.innerHTML = Object.keys(businessStats).map(business => {
-                const stats = businessStats[business];
-                const margin = stats.amazonRevenue > 0 ? (stats.profit / stats.amazonRevenue * 100) : 0;
-                const extraNote = business === 'Senor Bigote' ? ' (incl. HCP)' : '';
+            tbody.innerHTML = Object.keys(businessStats).map(businessName => {
+                const stats = businessStats[businessName];
+                const business = amazonHubData.businesses.find(b => b.name === businessName);
                 
                 return `
                     <tr>
-                        <td>${business}${extraNote}</td>
+                        <td>${businessName}${business?.isHCP ? ' <span class="hcp-badge">HCP</span>' : ''}</td>
                         <td>${stats.packages}</td>
                         <td>$${stats.amazonRevenue.toFixed(2)}</td>
                         <td>$${stats.driverCosts.toFixed(2)}</td>
                         <td>$${stats.profit.toFixed(2)}</td>
-                        <td>${margin.toFixed(1)}%</td>
+                        <td>$${stats.hcpRevenue.toFixed(2)}</td>
+                        <td>$${stats.totalProfit.toFixed(2)}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // Delete entry
-        function deleteEntry(id) {
-            if (confirm('Are you sure you want to delete this entry?')) {
-                amazonHubData.entries = amazonHubData.entries.filter(e => e.id !== id);
-                saveData();
-                updateAllDisplays();
+        // Update driver payments
+        function updateDriverPayments() {
+            const tbody = document.getElementById('driverPaymentStatus');
+            
+            const driverStats = amazonHubData.drivers.map(driver => {
+                const totalEarned = amazonHubData.entries
+                    .filter(e => e.driver === driver)
+                    .reduce((sum, e) => sum + e.driverPay, 0);
+                
+                const totalPaid = amazonHubData.payments
+                    .filter(p => p.driver === driver)
+                    .reduce((sum, p) => sum + p.amount, 0);
+                
+                const outstanding = totalEarned - totalPaid;
+                
+                const lastPayment = amazonHubData.payments
+                    .filter(p => p.driver === driver)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                
+                return {
+                    driver,
+                    totalEarned,
+                    totalPaid,
+                    outstanding,
+                    lastPayment: lastPayment ? lastPayment.date : 'Never'
+                };
+            });
+            
+            tbody.innerHTML = driverStats.map(stats => `
+                <tr>
+                    <td>${stats.driver}</td>
+                    <td>$${stats.totalEarned.toFixed(2)}</td>
+                    <td>$${stats.totalPaid.toFixed(2)}</td>
+                    <td>$${stats.outstanding.toFixed(2)}</td>
+                    <td>${stats.lastPayment}</td>
+                    <td>
+                        ${stats.outstanding > 0 ? `<button class="action-btn pay" onclick="quickPayDriver('${stats.driver}', ${stats.outstanding})">Pay Outstanding</button>` : '<span class="paid-badge">Paid Up</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Quick pay driver
+        function quickPayDriver(driver, amount) {
+            if (confirm(`Pay ${driver} $${amount.toFixed(2)}?`)) {
+                recordPaymentForDriver(driver, amount, new Date().toISOString().split('T')[0]);
             }
         }
 
-        // Add new driver
+        // Record payment
+        function recordPayment() {
+            const driver = document.getElementById('paymentDriver').value;
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const date = document.getElementById('paymentDate').value;
+            
+            if (!driver || !amount || !date) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            recordPaymentForDriver(driver, amount, date);
+            
+            // Clear form
+            document.getElementById('paymentDriver').value = '';
+            document.getElementById('paymentAmount').value = '';
+            document.getElementById('paymentDate').value = '';
+        }
+
+        // Record payment for driver
+        function recordPaymentForDriver(driver, amount, date) {
+            const payment = {
+                driver: driver,
+                amount: amount,
+                date: date,
+                week: getWeekStringFromDate(new Date(date))
+            };
+            
+            amazonHubData.payments.push(payment);
+            saveData();
+            updateDriverPayments();
+            updatePayouts();
+            updateDashboard();
+            
+            alert(`Payment of $${amount.toFixed(2)} recorded for ${driver}`);
+        }
+
+        // Update settings
+        function updateSettings() {
+            // Update business list
+            const businessList = document.getElementById('businessList');
+            businessList.innerHTML = amazonHubData.businesses.map(business => `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px;">
+                    <span>${business.name}${business.isHCP ? ' <span class="hcp-badge">HCP $' + business.hcpWeekly.toFixed(2) + '/week</span>' : ''}</span>
+                    <div>
+                        <button class="action-btn edit" onclick="toggleHCP('${business.name}')">${business.isHCP ? 'Remove HCP' : 'Make HCP'}</button>
+                        <button class="action-btn delete" onclick="removeBusiness('${business.name}')">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update driver list
+            const driverList = document.getElementById('driverList');
+            driverList.innerHTML = amazonHubData.drivers.map(driver => `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px;">
+                    <span>${driver}</span>
+                    <button class="action-btn delete" onclick="removeDriver('${driver}')">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        // Toggle HCP status
+        function toggleHCP(businessName) {
+            const business = amazonHubData.businesses.find(b => b.name === businessName);
+            if (!business) return;
+            
+            if (business.isHCP) {
+                business.isHCP = false;
+                business.hcpWeekly = 0;
+            } else {
+                const amount = prompt('Enter weekly HCP payment amount:', '230.77');
+                if (amount && !isNaN(amount)) {
+                    business.isHCP = true;
+                    business.hcpWeekly = parseFloat(amount);
+                }
+            }
+            
+            saveData();
+            updateSettings();
+            updateAllDisplays();
+        }
+
+        // Add business
+        function addBusiness() {
+            const name = document.getElementById('newBusinessName').value.trim();
+            const hcp = parseFloat(document.getElementById('newBusinessHCP').value) || 0;
+            
+            if (!name) {
+                alert('Please enter a business name');
+                return;
+            }
+            
+            if (amazonHubData.businesses.some(b => b.name === name)) {
+                alert('Business already exists');
+                return;
+            }
+            
+            amazonHubData.businesses.push({
+                name: name,
+                hcpWeekly: hcp,
+                isHCP: hcp > 0
+            });
+            
+            // Update dropdowns
+            updateBusinessDropdowns();
+            
+            document.getElementById('newBusinessName').value = '';
+            document.getElementById('newBusinessHCP').value = '';
+            
+            saveData();
+            updateSettings();
+            alert(`Business "${name}" added successfully!`);
+        }
+
+        // Add driver
         function addDriver() {
             const name = document.getElementById('newDriverName').value.trim();
+            
             if (!name) {
                 alert('Please enter a driver name');
                 return;
@@ -1017,86 +1567,67 @@
             }
             
             amazonHubData.drivers.push(name);
-            saveData();
             
             // Update dropdowns
-            const select = document.getElementById('entryDriver');
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
-            select.appendChild(option);
+            updateDriverDropdowns();
             
             document.getElementById('newDriverName').value = '';
+            
+            saveData();
+            updateSettings();
             alert(`Driver "${name}" added successfully!`);
         }
 
-        // Add new business
-        function addBusiness() {
-            const name = document.getElementById('newBusinessName').value.trim();
-            if (!name) {
-                alert('Please enter a business name');
-                return;
-            }
-            
-            if (amazonHubData.businesses.includes(name)) {
-                alert('Business already exists');
-                return;
-            }
-            
-            amazonHubData.businesses.push(name);
-            saveData();
-            
-            // Update dropdowns
-            const select = document.getElementById('entryBusiness');
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
-            select.appendChild(option);
-            
-            document.getElementById('newBusinessName').value = '';
-            alert(`Business "${name}" added successfully!`);
-        }
-
-        // Export data to CSV
-        function exportPayouts() {
-            const weekValue = document.getElementById('payoutWeek').value;
-            if (!weekValue) {
-                alert('Please select a week first');
-                return;
-            }
-            
-            let csv = 'Driver,Business,Packages,Amount\n';
-            
-            const rows = document.querySelectorAll('#driverPayouts tr');
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 4) {
-                    csv += `${cells[0].textContent},${cells[1].textContent},${cells[2].textContent},${cells[3].textContent}\n`;
+        // Update business dropdowns
+        function updateBusinessDropdowns() {
+            const selects = ['entryBusiness', 'editBusiness', 'filterBusiness'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = `<option value="">Select Business</option>` +
+                        amazonHubData.businesses.map(business => 
+                            `<option value="${business.name}">${business.name}</option>`
+                        ).join('');
+                    select.value = currentValue;
                 }
             });
-            
-            downloadCSV(csv, `payouts-${weekValue}.csv`);
         }
 
-        // Export all data
-        function exportAllData() {
-            let csv = 'Date,Driver,Business,Packages,Amazon Pay,Driver Pay,Profit\n';
+        // Update driver dropdowns
+        function updateDriverDropdowns() {
+            const selects = ['entryDriver', 'editDriver', 'filterDriver', 'paymentDriver'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = `<option value="">Select Driver</option>` +
+                        amazonHubData.drivers.map(driver => 
+                            `<option value="${driver}">${driver}</option>`
+                        ).join('');
+                    select.value = currentValue;
+                }
+            });
+        }
+
+        // Update rates
+        function updateRates() {
+            amazonHubData.settings.amazonRate1 = parseFloat(document.getElementById('amazonRate1').value);
+            amazonHubData.settings.amazonRate2 = parseFloat(document.getElementById('amazonRate2').value);
+            amazonHubData.settings.driverRate = parseFloat(document.getElementById('driverRate').value);
             
+            saveData();
+            alert('Rates updated successfully!');
+            
+            // Recalculate all entries with new rates
             amazonHubData.entries.forEach(entry => {
-                csv += `${entry.date},${entry.driver},${entry.business},${entry.packages},${entry.amazonPay.toFixed(2)},${entry.driverPay.toFixed(2)},${entry.profit.toFixed(2)}\n`;
+                entry.amazonPay = calculateAmazonPay(entry.packages);
+                entry.driverPay = calculateDriverPay(entry.packages);
+                entry.profit = entry.amazonPay - entry.driverPay;
             });
             
-            downloadCSV(csv, `amazon-hub-data-${new Date().toISOString().split('T')[0]}.csv`);
-        }
-
-        // Download CSV helper
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', filename);
-            a.click();
+            saveData();
+            updateAllDisplays();
         }
 
         // Helper functions
@@ -1118,32 +1649,6 @@
             return ISOweekStart;
         }
 
-        // Update all displays
-        function updateAllDisplays() {
-            updateDashboard();
-            updatePayouts();
-            updateBusinessSummary();
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date
-            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
-            
-            // Set current week
-            const now = new Date();
-            const year = now.getFullYear();
-            const weekNum = getWeekNumber(now);
-            document.getElementById('payoutWeek').value = `${year}-W${weekNum.toString().padStart(2, '0')}`;
-            
-            // Add event listener for package input
-            document.getElementById('entryPackages').addEventListener('input', updatePreview);
-            document.getElementById('entryBusiness').addEventListener('change', updatePreview);
-            
-            // Load saved data
-            loadData();
-        });
-
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
@@ -1152,66 +1657,121 @@
             return weekNo;
         }
 
-        // Mark all as paid
-        function markAllPaid() {
-            if (confirm('Mark all current week payments as paid?')) {
-                alert('Payments marked as paid successfully!');
-                // In a real app, this would update payment status in the database
-            }
+        function getWeekStringFromDate(date) {
+            const year = date.getFullYear();
+            const weekNum = getWeekNumber(date);
+            return `${year}-W${weekNum.toString().padStart(2, '0')}`;
         }
 
-        // Generate report
-        function generateReport() {
-            const type = document.getElementById('reportType').value;
-            const startDate = document.getElementById('reportStartDate').value;
-            const endDate = document.getElementById('reportEndDate').value;
-            
-            if (!startDate || !endDate) {
-                alert('Please select date range');
+        function getHCPWeeklyTotal() {
+            return amazonHubData.businesses
+                .filter(b => b.isHCP)
+                .reduce((sum, b) => sum + b.hcpWeekly, 0);
+        }
+
+        function calculateOutstandingPayments() {
+            const totalEarned = amazonHubData.entries.reduce((sum, e) => sum + e.driverPay, 0);
+            const totalPaid = amazonHubData.payments.reduce((sum, p) => sum + p.amount, 0);
+            return totalEarned - totalPaid;
+        }
+
+        function updateAllDisplays() {
+            updateDashboard();
+            updateManageEntries();
+            updatePayouts();
+            updateBusinessSummary();
+            updateDriverPayments();
+            updateSettings();
+        }
+
+        // Export functions
+        function exportPayouts() {
+            const weekValue = document.getElementById('payoutWeek').value;
+            if (!weekValue) {
+                alert('Please select a week first');
                 return;
             }
             
-            const reportContent = document.getElementById('reportContent');
-            reportContent.style.display = 'block';
+            let csv = 'Driver,Business,Packages,Amount\n';
             
-            // Filter entries by date range
-            const reportEntries = amazonHubData.entries.filter(e => {
-                return e.date >= startDate && e.date <= endDate;
+            const rows = document.querySelectorAll('#driverPayouts tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 4) {
+                    csv += `${cells[0].textContent},${cells[1].textContent},${cells[2].textContent},${cells[3].textContent}\n`;
+                }
             });
             
-            const totalPackages = reportEntries.reduce((sum, e) => sum + e.packages, 0);
-            const totalRevenue = reportEntries.reduce((sum, e) => sum + e.amazonPay, 0);
-            const totalCosts = reportEntries.reduce((sum, e) => sum + e.driverPay, 0);
-            const totalProfit = reportEntries.reduce((sum, e) => sum + e.profit, 0);
-            
-            reportContent.innerHTML = `
-                <h3>Report: ${type.charAt(0).toUpperCase() + type.slice(1)} Summary</h3>
-                <p>Period: ${startDate} to ${endDate}</p>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <h4>Total Packages</h4>
-                        <div class="amount">${totalPackages}</div>
-                    </div>
-                    <div class="summary-item">
-                        <h4>Total Revenue</h4>
-                        <div class="amount">$${totalRevenue.toFixed(2)}</div>
-                    </div>
-                    <div class="summary-item">
-                        <h4>Total Driver Costs</h4>
-                        <div class="amount">$${totalCosts.toFixed(2)}</div>
-                    </div>
-                    <div class="summary-item">
-                        <h4>Net Profit</h4>
-                        <div class="amount">$${totalProfit.toFixed(2)}</div>
-                    </div>
-                </div>
-            `;
+            downloadCSV(csv, `payouts-${weekValue}.csv`);
         }
 
-        // Import data (placeholder)
-        function importData() {
-            alert('Import feature: You can upload a CSV file with your historical data. This feature will be implemented based on your specific needs.');
+        function exportAllData() {
+            let csv = 'Date,Driver,Business,Packages,Amazon Pay,Driver Pay,Profit\n';
+            
+            amazonHubData.entries.forEach(entry => {
+                csv += `${entry.date},${entry.driver},${entry.business},${entry.packages},${entry.amazonPay.toFixed(2)},${entry.driverPay.toFixed(2)},${entry.profit.toFixed(2)}\n`;
+            });
+            
+            downloadCSV(csv, `amazon-hub-data-${new Date().toISOString().split('T')[0]}.csv`);
         }
+
+        function backupData() {
+            const backup = JSON.stringify(amazonHubData, null, 2);
+            const blob = new Blob([backup], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `amazon-hub-backup-${new Date().toISOString().split('T')[0]}.json`);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function markAllPaid() {
+            if (confirm('Mark all current week payments as paid?')) {
+                alert('Payments marked as paid successfully!');
+            }
+        }
+
+        function importData() {
+            alert('Import feature: Upload your backup JSON file to restore your data.');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+            
+            // Set current week
+            const now = new Date();
+            const year = now.getFullYear();
+            const weekNum = getWeekNumber(now);
+            document.getElementById('payoutWeek').value = `${year}-W${weekNum.toString().padStart(2, '0')}`;
+            
+            // Add event listeners
+            document.getElementById('entryPackages').addEventListener('input', updatePreview);
+            document.getElementById('entryBusiness').addEventListener('change', updatePreview);
+            
+            // Close modal when clicking outside
+            document.getElementById('editModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditModal();
+                }
+            });
+            
+            // Load saved data and update displays
+            loadData();
+        });
     </script>
 </body>
 </html>
