@@ -1,70 +1,578 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Inwood Logistics Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inwood Logistics - Advanced Management System</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Inwood Logistics Dashboard</h1>
-    <div id="global-filters">
-      <label for="timeframe">View:</label>
-      <select id="timeframe">
-        <option value="today">Today</option>
-        <option value="thisWeek">This Week (Mon–Sun)</option>
-        <option value="lastWeek">Last Week</option>
-        <option value="thisMonth">Month-to-Date</option>
-        <option value="lifetime">Lifetime</option>
-        <option value="custom">Custom Range</option>
-      </select>
-      <label><input type="checkbox" id="amazonWeekToggle"> Amazon Week (Sun–Sat)</label>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">IL</div>
+                    <div class="company-info">
+                        <h1>Inwood Logistics</h1>
+                        <p>Amazon Hub Management System v2.0</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-pill">
+                        <span class="stat-label">Today</span>
+                        <span class="stat-value" id="headerToday">$0</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="stat-label">WTD</span>
+                        <span class="stat-value" id="headerWTD">$0</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="stat-label">MTD</span>
+                        <span class="stat-value" id="headerMTD">$0</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="stat-label">YTD</span>
+                        <span class="stat-value" id="headerYTD">$0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <button class="nav-btn active" data-tab="dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" data-tab="daily-ops">
+                <span class="nav-icon">📝</span>
+                <span>Daily Operations</span>
+            </button>
+            <button class="nav-btn" data-tab="financial">
+                <span class="nav-icon">💰</span>
+                <span>Financial Analysis</span>
+            </button>
+            <button class="nav-btn" data-tab="payroll">
+                <span class="nav-icon">💳</span>
+                <span>Payroll</span>
+            </button>
+            <button class="nav-btn" data-tab="historical">
+                <span class="nav-icon">📈</span>
+                <span>Historical Data</span>
+            </button>
+            <button class="nav-btn" data-tab="reports">
+                <span class="nav-icon">📑</span>
+                <span>Reports</span>
+            </button>
+            <button class="nav-btn" data-tab="settings">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <div class="dashboard-header">
+                    <h2>Financial Overview</h2>
+                    <div class="date-display" id="currentDate"></div>
+                </div>
+
+                <!-- Key Metrics Grid -->
+                <div class="metrics-grid">
+                    <div class="metric-card primary">
+                        <div class="metric-header">
+                            <h3>Gross Revenue</h3>
+                            <span class="period-badge">YTD</span>
+                        </div>
+                        <div class="metric-value" id="ytdGrossRevenue">$0</div>
+                        <div class="metric-breakdown">
+                            <div class="breakdown-item">
+                                <span>WTD:</span>
+                                <span id="wtdGrossRevenue">$0</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>MTD:</span>
+                                <span id="mtdGrossRevenue">$0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card success">
+                        <div class="metric-header">
+                            <h3>Net Profit</h3>
+                            <span class="period-badge">YTD</span>
+                        </div>
+                        <div class="metric-value" id="ytdNetProfit">$0</div>
+                        <div class="metric-breakdown">
+                            <div class="breakdown-item">
+                                <span>WTD:</span>
+                                <span id="wtdNetProfit">$0</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>MTD:</span>
+                                <span id="mtdNetProfit">$0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card warning">
+                        <div class="metric-header">
+                            <h3>Driver Costs</h3>
+                            <span class="period-badge">YTD</span>
+                        </div>
+                        <div class="metric-value" id="ytdDriverCosts">$0</div>
+                        <div class="metric-breakdown">
+                            <div class="breakdown-item">
+                                <span>WTD:</span>
+                                <span id="wtdDriverCosts">$0</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>MTD:</span>
+                                <span id="mtdDriverCosts">$0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card info">
+                        <div class="metric-header">
+                            <h3>Profit Margin</h3>
+                            <span class="period-badge">YTD</span>
+                        </div>
+                        <div class="metric-value" id="ytdProfitMargin">0%</div>
+                        <div class="metric-breakdown">
+                            <div class="breakdown-item">
+                                <span>WTD:</span>
+                                <span id="wtdProfitMargin">0%</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>MTD:</span>
+                                <span id="mtdProfitMargin">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Performance Cards -->
+                <div class="section-header">
+                    <h3>Business Performance</h3>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="wtd">WTD</button>
+                        <button class="toggle-btn" data-view="mtd">MTD</button>
+                        <button class="toggle-btn" data-view="ytd">YTD</button>
+                    </div>
+                </div>
+
+                <div class="business-grid" id="businessGrid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="section-header">
+                    <h3>Recent Deliveries</h3>
+                    <button class="btn-secondary" onclick="viewAllEntries()">View All</button>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Driver</th>
+                                <th>Business</th>
+                                <th>Packages</th>
+                                <th>Gross</th>
+                                <th>Cost</th>
+                                <th>Net</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivity">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Daily Operations Tab -->
+            <div class="tab-content" id="daily-ops-tab">
+                <div class="ops-header">
+                    <h2>Daily Operations</h2>
+                    <button class="btn-primary" onclick="openQuickEntry()">+ Quick Entry</button>
+                </div>
+
+                <!-- Quick Entry Form -->
+                <div class="form-card" id="quickEntryForm">
+                    <h3>Add Delivery Entry</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="entryDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Driver</label>
+                            <select id="entryDriver">
+                                <option value="">Select Driver</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Business</label>
+                            <select id="entryBusiness">
+                                <option value="">Select Business</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Packages</label>
+                            <input type="number" id="entryPackages" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="calculation-preview">
+                        <div class="calc-item">
+                            <span>Amazon Pays:</span>
+                            <span id="calcAmazon">$0.00</span>
+                        </div>
+                        <div class="calc-item">
+                            <span>Driver Cost:</span>
+                            <span id="calcDriver">$0.00</span>
+                        </div>
+                        <div class="calc-item highlight">
+                            <span>Your Profit:</span>
+                            <span id="calcProfit">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="addEntry()">Add Entry</button>
+                        <button class="btn-secondary" onclick="clearEntryForm()">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Today's Entries -->
+                <div class="section-header">
+                    <h3>Today's Deliveries</h3>
+                    <div class="stats-row">
+                        <span>Total: <strong id="todayTotal">$0</strong></span>
+                        <span>Packages: <strong id="todayPackages">0</strong></span>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Driver</th>
+                                <th>Business</th>
+                                <th>Packages</th>
+                                <th>Revenue</th>
+                                <th>Cost</th>
+                                <th>Profit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayEntries">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Financial Analysis Tab -->
+            <div class="tab-content" id="financial-tab">
+                <div class="financial-header">
+                    <h2>Financial Analysis</h2>
+                    <div class="period-selector">
+                        <select id="analysisPeriod">
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="year">This Year</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Profit Analysis -->
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h3>Revenue Breakdown</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>Profit Trends</h3>
+                        <canvas id="profitTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Business Comparison Table -->
+                <div class="section-header">
+                    <h3>Business Comparison</h3>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Business</th>
+                                <th>WTD Gross</th>
+                                <th>WTD Net</th>
+                                <th>MTD Gross</th>
+                                <th>MTD Net</th>
+                                <th>YTD Gross</th>
+                                <th>YTD Net</th>
+                                <th>Margin %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="businessComparison">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payroll Tab -->
+            <div class="tab-content" id="payroll-tab">
+                <div class="payroll-header">
+                    <h2>Payroll Management</h2>
+                    <button class="btn-primary" onclick="processPayroll()">Process Weekly Payroll</button>
+                </div>
+
+                <!-- Driver Earnings Summary -->
+                <div class="driver-cards" id="driverCards">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Detailed Payroll Table -->
+                <div class="section-header">
+                    <h3>Current Week Payroll</h3>
+                    <span class="week-display" id="currentWeek"></span>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Driver</th>
+                                <th>Business</th>
+                                <th>Packages</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollTable">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Historical Data Tab -->
+            <div class="tab-content" id="historical-tab">
+                <div class="historical-header">
+                    <h2>Historical Data Management</h2>
+                    <p class="info-text">Import historical monthly data with estimated splits. Entries marked with * are estimates.</p>
+                </div>
+
+                <!-- Import Historical Data Form -->
+                <div class="form-card">
+                    <h3>Import Historical Month</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Month/Year</label>
+                            <input type="month" id="historicalMonth">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Gross Revenue</label>
+                            <input type="number" id="historicalGross" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Driver Cost %</label>
+                            <input type="number" id="historicalDriverPercent" value="60" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Estimated Net Profit</label>
+                            <input type="text" id="historicalNet" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Notes (Optional)</label>
+                        <textarea id="historicalNotes" rows="2" placeholder="e.g., Based on bank statements"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="importHistorical()">Import Month</button>
+                        <button class="btn-secondary" onclick="clearHistoricalForm()">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Historical Data Table -->
+                <div class="section-header">
+                    <h3>Historical Records</h3>
+                    <div class="legend">
+                        <span class="legend-item"><span class="asterisk">*</span> = Estimated Data</span>
+                        <span class="legend-item">No asterisk = Actual Tracked Data</span>
+                    </div>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Gross Revenue</th>
+                                <th>Driver Costs</th>
+                                <th>Net Profit</th>
+                                <th>Margin %</th>
+                                <th>Type</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historicalTable">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-content" id="reports-tab">
+                <div class="reports-header">
+                    <h2>Reports & Analytics</h2>
+                </div>
+
+                <div class="report-cards">
+                    <div class="report-card" onclick="generateReport('weekly')">
+                        <div class="report-icon">📅</div>
+                        <h3>Weekly Report</h3>
+                        <p>Detailed weekly performance analysis</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('monthly')">
+                        <div class="report-icon">📊</div>
+                        <h3>Monthly Report</h3>
+                        <p>Comprehensive monthly summary</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('driver')">
+                        <div class="report-icon">👤</div>
+                        <h3>Driver Report</h3>
+                        <p>Individual driver performance</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('business')">
+                        <div class="report-icon">🏢</div>
+                        <h3>Business Report</h3>
+                        <p>Business-specific analytics</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('tax')">
+                        <div class="report-icon">📋</div>
+                        <h3>Tax Report</h3>
+                        <p>Tax preparation summary</p>
+                    </div>
+                    <div class="report-card" onclick="exportAllData()">
+                        <div class="report-icon">💾</div>
+                        <h3>Export All Data</h3>
+                        <p>Download complete database</p>
+                    </div>
+                </div>
+
+                <!-- Report Preview Area -->
+                <div id="reportPreview" class="report-preview hidden">
+                    <!-- Will be populated when report is generated -->
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings-tab">
+                <div class="settings-header">
+                    <h2>System Settings</h2>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Payment Rates -->
+                    <div class="settings-card">
+                        <h3>Payment Rates</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Amazon Rate (1-25 packages)</label>
+                                <input type="number" id="amazonRate1" value="2.00" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Amazon Rate (26+ packages)</label>
+                                <input type="number" id="amazonRate2" value="1.50" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Driver Rate (per package)</label>
+                                <input type="number" id="driverRate" value="1.00" step="0.01">
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="updateRates()">Update Rates</button>
+                    </div>
+
+                    <!-- Business Management -->
+                    <div class="settings-card">
+                        <h3>Business Management</h3>
+                        <div class="business-list" id="businessList">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <input type="text" id="newBusinessName" placeholder="Business Name">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" id="newBusinessHCP" placeholder="HCP Weekly (optional)" step="0.01">
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="addBusiness()">Add Business</button>
+                    </div>
+
+                    <!-- Driver Management -->
+                    <div class="settings-card">
+                        <h3>Driver Management</h3>
+                        <div class="driver-list" id="driverList">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="newDriverName" placeholder="Driver Name">
+                        </div>
+                        <button class="btn-primary" onclick="addDriver()">Add Driver</button>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="settings-card">
+                        <h3>Data Management</h3>
+                        <div class="button-group">
+                            <button class="btn-secondary" onclick="backupData()">Backup Data</button>
+                            <button class="btn-secondary" onclick="restoreData()">Restore Data</button>
+                            <button class="btn-danger" onclick="resetData()">Reset All Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-    <div id="custom-range" style="display:none;">
-      <input type="date" id="startDate"> to <input type="date" id="endDate">
-      <button id="applyRange">Apply</button>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be inserted here -->
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <!-- Modal actions will be inserted here -->
+            </div>
+        </div>
     </div>
-  </header>
 
-  <main>
-    <section id="global-overview" class="card">
-      <h2>Global Overview</h2>
-      <div id="global-totals"></div>
-      <button id="export-global">Export CSV</button>
-    </section>
-
-    <section id="business-section">
-      <h2>Businesses</h2>
-      <div id="business-cards"></div>
-    </section>
-
-    <section id="drivers-section">
-      <h2>Drivers</h2>
-      <div id="driver-cards"></div>
-    </section>
-
-    <section id="entries-section" class="card">
-      <h2>Daily Entries</h2>
-      <form id="entry-form">
-        <input type="date" id="entry-date" required>
-        <input type="text" id="entry-driver" placeholder="Driver name" required>
-        <input type="text" id="entry-business" placeholder="Business name" required>
-        <input type="number" id="entry-packages" placeholder="Packages" required>
-        <button type="submit">Add Entry</button>
-      </form>
-      <table id="entries-table">
-        <thead>
-          <tr>
-            <th>Date</th><th>Driver</th><th>Business</th><th>Packages</th>
-            <th>Amazon Pay</th><th>Driver Pay</th><th>Profit</th>
-            <th>Status</th><th>Payment</th><th>Notes</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
+    <!-- Load JavaScript - IMPORTANT: Using your existing file names -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
