@@ -2345,9 +2345,7 @@
         }
 
         function showNotifications() {
-            alert('2 Notifications:
-1. Gabriel payment pending: $162
-2. Rafa JR payment pending: $153');
+            alert('2 Notifications:\n1. Gabriel payment pending: $162\n2. Rafa JR payment pending: $153');
         }
 
         function markPaid(driver, amount) {
@@ -2586,13 +2584,11 @@
                 return date >= firstDay && date <= lastDay;
             });
             
-            let csv = 'Date,Driver,Business,Packages,Amount
-';
+            let csv = 'Date,Driver,Business,Packages,Amount\n';
             
             weekDeliveries.forEach(d => {
                 const amount = calculateDriverPay(d.packages);
-                csv += `${d.date},${d.driver},${d.business},${d.packages},${amount}
-`;
+                csv += `${d.date},${d.driver},${d.business},${d.packages},${amount}\n`;
             });
             
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -2753,4 +2749,107 @@
 
         // Clear all data
         function clearAllData() {
-            if (confirm('
+            if (confirm('⚠️ WARNING: This will delete ALL data permanently! Are you sure?')) {
+                if (confirm('This action cannot be undone. Please confirm again.')) {
+                    localStorage.removeItem('inwoodLogisticsData');
+                    location.reload();
+                }
+            }
+        }
+
+        // Restore data
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        inwoodData = data;
+                        saveData();
+                        alert('Data restored successfully!');
+                        location.reload();
+                    } catch (error) {
+                        alert('Error restoring data. Please check the file format.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // Filter Amazon payments
+        function filterAmazonPayments(filter) {
+            document.querySelectorAll('#amazonPayments .period-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const tbody = document.getElementById('amazonPaymentsBody');
+            tbody.innerHTML = '';
+            
+            let filteredPayments = inwoodData.amazonPayments;
+            
+            if (filter !== 'all') {
+                const businessMap = {
+                    '809': '809 Restaurant',
+                    'sb': 'Senor Bigote',
+                    'cs': 'Cana Stays'
+                };
+                filteredPayments = inwoodData.amazonPayments.filter(p => 
+                    p.business === businessMap[filter]
+                );
+            }
+            
+            filteredPayments.forEach(payment => {
+                const driverCost = payment.amount * 0.6;
+                const netProfit = payment.amount - driverCost;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${payment.month}</td>
+                        <td>${payment.business}</td>
+                        <td>$${payment.amount.toFixed(2)}</td>
+                        <td>$${payment.amount.toFixed(2)}</td>
+                        <td>$0.00</td>
+                        <td><span class="badge badge-success">Received</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Save and load data
+        function saveData() {
+            localStorage.setItem('inwoodLogisticsData', JSON.stringify(inwoodData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('inwoodLogisticsData');
+            if (saved) {
+                inwoodData = JSON.parse(saved);
+            }
+        }
+
+        <!-- Initialize -->
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            loadWeek();
+            updateFinancialOverview('wtd');
+            updateDeliveryDropdowns();
+            updateDashboardTotals();
+            
+            // Pre-load analytics data
+            if (inwoodData.deliveries.length > 0) {
+                loadAdvancedAnalytics();
+            }
+        });
+    </script>
+</body>
+</html>
